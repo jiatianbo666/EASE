@@ -4,9 +4,6 @@ A budget-aware retrieval agent that models search as an **economically rational 
 a skill store guides where to search, a budget ledger constrains every step, and the system
 makes an explicit trade-off between **answer quality** and **retrieval cost**.
 
-> Full realism principle: **no mocks, no fake data, no simulated pipelines.** Every answer comes
-> from real LLM API calls + real retrieval over an offline HotpotQA corpus (or Tavily web search).
-
 ## Results (n=50, same 50 HotpotQA questions, real API)
 
 | method     | EM    | F1    | searches/q | cost/q |
@@ -30,21 +27,7 @@ Key findings:
 
 ## Architecture
 
-```
-                    ┌─────────────────────────────────────────┐
-  Experience        │ SkillStore: skill retrieval surface (vector) + payloads  │
-                    │  decomposition templates / budget ratios / query        │
-                    │  templates / stopping params; ExpeL lifecycle            │
-                    ├─────────────────────────────────────────┤
-  Control           │ MetacognitiveManager: coverage graph / gaps / confidence │
-                    │ BudgetPlanner: allocation + ledger injection (BATS)      │
-                    │ Router: RETRIEVE / REASON / GENERATE / STOP              │
-                    │ StopChecker: compound stopping + safe-stop               │
-                    ├─────────────────────────────────────────┤
-  Execution         │ QueryGenerator → SearchTool → UtilityEvaluator           │
-                    │ → EvidenceCompressor → WorkingMemory (dedup)             │
-                    └─────────────────────────────────────────┘
-```
+![EASE architecture](assets/architecture.png)
 
 **Asymmetric model split** (the cost-saving core):
 
