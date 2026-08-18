@@ -1,0 +1,62 @@
+# EASE 默认配置 —— 所有可调参数集中于此
+# 密钥等环境变量从项目根 .env 注入，配置中用环境变量名占位（见 ease/utils/config.py）
+# 注意：本文件任何位置都不得出现 美元符+左花括号 字面量，会被误识别为占位符
+# 模型价格表位于 ease/llm/costs.py（官方定价，2026-08-17 验证）
+
+llm:
+  base_url: ${DEEPSEEK_BASE_URL}
+  api_key: ${DEEPSEEK_API_KEY}
+  small_model: ${DEEPSEEK_SMALL_MODEL}
+  large_model: ${DEEPSEEK_LARGE_MODEL}
+  timeout: 60
+  max_retries: 3
+  # 小模型默认关推理（省钱），大模型默认开推理（保质量）
+  small_disable_reasoning: true
+  large_disable_reasoning: false
+  # 最终答案生成温度：默认走 API 温度（v4-pro 默认高 → 单次生成方差大，
+  # 同一证据三跑三答案）。降到 0.1 让"剥离修饰/消歧"指令稳定生效。
+  answer_temperature: 0.1
+  # 成本核算：auto=按当前时段的官方分时价 | peak | off-peak
+  pricing_mode: auto
+  # 最终化保留：最终答案生成预留的 token 预算比例（P12）
+  finalization_reserve: 0.18
+
+search:
+  backend: ${EASE_SEARCH_BACKEND}
+  offline:
+    corpus_dir: data/corpus
+    lambda_bm25: 0.3            # 混合检索权重：score = λ·bm25 + (1-λ)·dense
+    fast_lookup_k: 2
+    dense_candidates: 50        # dense 候选数（faiss top-K）
+    bm25_candidates: 50         # 并集候选：dense top-K ∪ bm25 top-K（保精确匹配）
+  web:
+    provider: tavily            # tavily | bing
+    max_results: 5
+    search_depth: basic
+
+experience:
+  skills_db: data/skills/skills.db
+  retrieve_top_k: 5
+  dedupe_threshold: 0.95        # 技能描述余弦去重阈值（ExpeL）
+  min_sim: 0.15                 # 检索相似度下限（task_type 硬门之上再兜底）
+
+control:
+  search_budget: 10             # 每题检索调用上限（可配）
+  coverage_stop_threshold: 0.8  # core 覆盖度停止阈值
+  conf_stop_threshold: 0.75     # 校准置信度停止阈值
+  marginal_gain_eps: 0.02       # 覆盖度边际增益早停阈值
+  marginal_gain_window: 2       # 连续 N 轮低于阈值才停
+  conflict_allowance: 2         # 冲突裁决额外检索配额
+
+execution:
+  utility:
+    relevance_w: 0.5
+    novelty_w: 0.3
+    redundancy_w: 0.2
+    keep_threshold: 0.35
+    redundancy_dup_threshold: 0.95   # 与已有证据 cos > 此值视为冗余
+
+eval:
+  sample_n: 100
+  seed: 42
+  max_workers: 1

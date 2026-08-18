@@ -1,0 +1,30 @@
+# 密钥与环境配置（切勿提交）
+.env
+.mcp.json
+
+# 数据 / 调研产物 / 论文（不发布）
+data/
+report/
+report.zip
+ga_src/
+ga_tree.json
+
+# 设计与 AI 分析文档（不发布）
+PROJECT_JOURNAL.md
+task.md
+REALNESS.md
+
+# Claude Code 配置与工作流脚本（不发布）
+.claude/
+scripts/workflow_failure_classify.js
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+
+# 杂项
+.DS_Store
+Thumbs.db
